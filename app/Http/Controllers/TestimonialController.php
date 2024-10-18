@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTestimonialRequest;
 use App\Models\Testimonial;
+use App\Repositories\TestimonialRepository;
 use Illuminate\Http\Request;
 
 class TestimonialController extends Controller
 {
+    public function __construct(private TestimonialRepository $testimonialRepository) {}
+
     public function home()
     {
         $testimonials = Testimonial::where('visible', true)->orderBy('order')->get();
@@ -49,16 +53,9 @@ class TestimonialController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTestimonialRequest $request)
     {
-        $this->validate($request, [
-            'name' => 'required',
-            'quote' => 'required',
-            'order' => 'required|numeric',
-            'visible' => 'required|boolean',
-        ]);
-
-        Testimonial::create($request->all());
+        $this->testimonialRepository->storeTestimonial($request->validated());
 
         return redirect()->route('admin.testimonials.index')->with('success_message', 'Testimonial Created Successfully!');
     }
